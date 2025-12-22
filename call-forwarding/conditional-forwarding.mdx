@@ -1,0 +1,405 @@
+---
+title: "Conditional Call Forwarding Based on Schedule"
+description: "Set up time-based call routing to automatically forward calls to Recepta.ai based on your business hours, specific days, or custom schedules"
+---
+
+## Overview
+
+Conditional call forwarding allows you to automatically route calls based on your business schedule. This ensures callers always reach someone - whether it's your team during business hours or your Recepta.ai AI assistant outside of them.
+
+**Common use cases:**
+- Forward calls to Recepta.ai **outside business hours**
+- Route **weekend and holiday calls** to your AI receptionist
+- Set up **overflow handling** when your team can't answer
+- Create **hybrid schedules** with different routing per day
+
+<CardGroup cols={2}>
+  <Card title="Business Hours" icon="sun">
+    Calls go to your business line during working hours
+  </Card>
+
+  <Card title="After Hours" icon="moon">
+    Calls automatically forward to Recepta.ai when you're closed
+  </Card>
+
+  <Card title="Weekends & Holidays" icon="calendar">
+    AI handles all calls on non-business days
+  </Card>
+
+  <Card title="Overflow" icon="phone-missed">
+    Forward to Recepta.ai when lines are busy or unanswered
+  </Card>
+</CardGroup>
+
+---
+
+## Getting Your Recepta.ai Phone Number
+
+Before configuring conditional forwarding, you'll need your Recepta.ai phone number.
+
+<Steps>
+  <Step title="Access Your Dashboard">
+    Navigate to your Recepta.ai dashboard at [https://app.recepta.ai](https://app.recepta.ai)
+  </Step>
+
+  <Step title="Go to Settings">
+    Click on **Settings** in the navigation menu
+  </Step>
+
+  <Step title="Copy Your Phone Number">
+    Your assigned Recepta.ai phone number is displayed under **Your Assigned Number**. Copy this number for use in your forwarding configuration.
+
+    <img src="/images/phonenumber.png" alt="Recepta.ai Phone Number Location" />
+  </Step>
+</Steps>
+
+<Note>
+Your Recepta.ai number is a dedicated line for your business. All calls to this number are handled by your AI receptionist with your custom configuration.
+</Note>
+
+---
+
+## Setup by Carrier Type
+
+Choose your phone system type below for specific instructions:
+
+<Tabs>
+  <Tab title="AT&T">
+    ### AT&T Conditional Call Forwarding
+
+    AT&T supports three types of conditional forwarding:
+
+    **Forward when busy (line in use):**
+    ```
+    *67*[Your Recepta.ai Number]#
+    ```
+
+    **Forward when no answer (after 4 rings):**
+    ```
+    *61*[Your Recepta.ai Number]#
+    ```
+
+    **Forward when unreachable (phone off/no signal):**
+    ```
+    *62*[Your Recepta.ai Number]#
+    ```
+
+    <Accordion title="How to Disable">
+      - Disable busy forwarding: `#67#`
+      - Disable no-answer forwarding: `#61#`
+      - Disable unreachable forwarding: `#62#`
+    </Accordion>
+
+    <Warning>
+    Dial these codes from your business phone, not from another device. You'll hear a confirmation tone when activated.
+    </Warning>
+  </Tab>
+
+  <Tab title="Verizon">
+    ### Verizon Conditional Call Forwarding
+
+    **Forward when busy:**
+    ```
+    *90[Your Recepta.ai Number]
+    ```
+
+    **Forward when no answer:**
+    ```
+    *92[Your Recepta.ai Number]
+    ```
+
+    <Accordion title="How to Disable">
+      - Disable busy forwarding: `*900`
+      - Disable no-answer forwarding: `*920`
+    </Accordion>
+  </Tab>
+
+  <Tab title="T-Mobile">
+    ### T-Mobile Conditional Call Forwarding
+
+    **Forward when busy:**
+    ```
+    **67*[Your Recepta.ai Number]#
+    ```
+
+    **Forward when no answer:**
+    ```
+    **61*[Your Recepta.ai Number]#
+    ```
+
+    **Forward when unreachable:**
+    ```
+    **62*[Your Recepta.ai Number]#
+    ```
+
+    <Accordion title="How to Disable">
+      - Disable busy forwarding: `##67#`
+      - Disable no-answer forwarding: `##61#`
+      - Disable unreachable forwarding: `##62#`
+    </Accordion>
+  </Tab>
+
+  <Tab title="Landline">
+    ### Traditional Landline Forwarding
+
+    Most landline providers support conditional forwarding. Contact your provider or try these common codes:
+
+    **Forward when busy:**
+    ```
+    *90[Your Recepta.ai Number]
+    ```
+
+    **Forward when no answer:**
+    ```
+    *92[Your Recepta.ai Number]
+    ```
+
+    <Note>
+    Codes vary by provider. Contact your local phone company for exact instructions.
+    </Note>
+  </Tab>
+</Tabs>
+
+---
+
+## VoIP & Business Phone Systems
+
+For VoIP and PBX systems, you can configure sophisticated time-based routing rules directly in your admin portal.
+
+### RingCentral
+
+<Steps>
+  <Step title="Access Admin Portal">
+    Log in to your RingCentral Admin Portal
+  </Step>
+
+  <Step title="Navigate to Call Handling">
+    Go to **Phone System** → **Auto-Receptionist** → **Call Handling**
+  </Step>
+
+  <Step title="Configure Business Hours">
+    Set your business hours schedule under the **Business Hours** section
+  </Step>
+
+  <Step title="Set After-Hours Routing">
+    Under **After Hours**, select **Forward calls to** and enter your Recepta.ai number
+  </Step>
+
+  <Step title="Save Configuration">
+    Click **Save** and test by calling outside business hours
+  </Step>
+</Steps>
+
+<Info>
+For detailed RingCentral instructions, see our [RingCentral Call Forwarding Guide](/call-forwarding/ringcentral).
+</Info>
+
+### 8x8
+
+<Steps>
+  <Step title="Log in to Admin Console">
+    Access your 8x8 Admin Console
+  </Step>
+
+  <Step title="Open Call Handling Rules">
+    Navigate to **Call Handling** → **Time-Based Routing**
+  </Step>
+
+  <Step title="Create After-Hours Rule">
+    Create a new rule for calls received outside business hours
+  </Step>
+
+  <Step title="Set Destination">
+    Configure the destination as your Recepta.ai phone number
+  </Step>
+</Steps>
+
+<Info>
+For detailed 8x8 instructions, see our [8x8 Call Forwarding Guide](/call-forwarding/8x8).
+</Info>
+
+### Dialpad
+
+<Steps>
+  <Step title="Access Settings">
+    Log in to Dialpad and go to **Admin Settings**
+  </Step>
+
+  <Step title="Configure Office Hours">
+    Set your office hours under **Office** → **Business Hours**
+  </Step>
+
+  <Step title="Set After-Hours Routing">
+    Configure after-hours call routing to forward to your Recepta.ai number
+  </Step>
+</Steps>
+
+<Info>
+For detailed Dialpad instructions, see our [Dialpad Call Forwarding Guide](/call-forwarding/dialpad).
+</Info>
+
+### Google Voice
+
+<Steps>
+  <Step title="Open Google Voice Settings">
+    Go to [voice.google.com](https://voice.google.com) and click the gear icon
+  </Step>
+
+  <Step title="Navigate to Calls">
+    Select **Calls** from the settings menu
+  </Step>
+
+  <Step title="Enable Call Forwarding">
+    Under **Call forwarding**, add your Recepta.ai number
+  </Step>
+
+  <Step title="Configure Schedule">
+    Use the scheduling options to set when forwarding is active
+  </Step>
+</Steps>
+
+<Info>
+For detailed Google Voice instructions, see our [Google Voice Call Forwarding Guide](/call-forwarding/google-voice).
+</Info>
+
+---
+
+## Schedule-Based Routing Examples
+
+### Example 1: Standard Business Hours
+
+Forward all calls outside 9am-5pm Monday-Friday to Recepta.ai.
+
+| Time | Destination |
+|------|-------------|
+| Mon-Fri 9:00 AM - 5:00 PM | Your Business Line |
+| Mon-Fri 5:00 PM - 9:00 AM | Recepta.ai |
+| Saturday - Sunday (All Day) | Recepta.ai |
+
+### Example 2: Extended Hours with Evening Coverage
+
+Business handles calls during peak hours; Recepta.ai covers early morning and evening.
+
+| Time | Destination |
+|------|-------------|
+| Mon-Fri 8:00 AM - 8:00 PM | Your Business Line |
+| Mon-Fri 8:00 PM - 8:00 AM | Recepta.ai |
+| Weekends | Recepta.ai |
+
+### Example 3: Overflow + After-Hours
+
+Recepta.ai handles overflow during business hours AND all after-hours calls.
+
+| Condition | Destination |
+|-----------|-------------|
+| During business hours (answered) | Your Business Line |
+| During business hours (busy/no answer) | Recepta.ai |
+| After business hours | Recepta.ai |
+
+### Example 4: Holiday Coverage
+
+Special routing for holidays when your office is closed.
+
+| Date | Destination |
+|------|-------------|
+| Regular business days | Normal routing |
+| New Year's Day | Recepta.ai |
+| Memorial Day | Recepta.ai |
+| July 4th | Recepta.ai |
+| Labor Day | Recepta.ai |
+| Thanksgiving | Recepta.ai |
+| Christmas | Recepta.ai |
+| Custom holidays | Recepta.ai |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Test Your Configuration">
+    After setting up conditional forwarding:
+    1. Call your business number **during** business hours - verify it rings your team
+    2. Call your business number **after** hours - verify Recepta.ai answers
+    3. Test the "busy" scenario by keeping your line occupied
+    4. Test the "no answer" scenario by not picking up within the ring limit
+  </Accordion>
+
+  <Accordion title="Customize Your AI Greeting for After-Hours">
+    Update your Recepta.ai greeting to acknowledge after-hours calls:
+
+    *"Thank you for calling [Business Name]. Our office is currently closed. Our regular hours are Monday through Friday, 9am to 5pm Eastern. I'm an AI assistant and I'd be happy to help you, take a message, or schedule a callback."*
+  </Accordion>
+
+  <Accordion title="Enable Notifications">
+    In your Recepta.ai dashboard, enable notifications to stay informed about after-hours activity:
+    - **Email notifications** - Receive summaries of calls handled
+    - **SMS alerts** - Get instant alerts for urgent messages
+    - **Daily digest** - Review all AI-handled calls each morning
+  </Accordion>
+
+  <Accordion title="Review and Update Seasonally">
+    Revisit your forwarding rules:
+    - Before holiday seasons (update holiday schedule)
+    - When business hours change (daylight saving, seasonal hours)
+    - During vacation periods (may want full forwarding)
+    - For special events or temporary closures
+  </Accordion>
+
+  <Accordion title="Inform Your Callers">
+    Update your voicemail greeting and website to let callers know they can reach assistance 24/7 through your AI receptionist.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<Warning>
+If calls aren't forwarding correctly, check these common issues:
+</Warning>
+
+| Issue | Solution |
+|-------|----------|
+| Forwarding not activating | Try deactivating first (`#` codes), then reactivating |
+| Calls going to voicemail instead | Disable voicemail or set call forwarding to take priority |
+| Forwarding with delay | Reduce the ring count before forward triggers |
+| Intermittent forwarding | Check your carrier's network status |
+| Wrong number forwarding | Verify Recepta.ai number includes country code (+1 for US) |
+
+### Still Having Issues?
+
+<CardGroup cols={2}>
+  <Card title="Contact Support" icon="envelope" href="mailto:support@recepta.ai">
+    Email our support team for help with configuration
+  </Card>
+
+  <Card title="Check Platform Guides" icon="book">
+    See our platform-specific guides for detailed instructions:
+    - [RingCentral](/call-forwarding/ringcentral)
+    - [8x8](/call-forwarding/8x8)
+    - [Dialpad](/call-forwarding/dialpad)
+    - [Google Voice](/call-forwarding/google-voice)
+  </Card>
+</CardGroup>
+
+---
+
+## Related Guides
+
+<CardGroup cols={2}>
+  <Card title="RingCentral" icon="phone" href="/call-forwarding/ringcentral">
+    Complete RingCentral forwarding guide
+  </Card>
+
+  <Card title="8x8" icon="phone" href="/call-forwarding/8x8">
+    Complete 8x8 forwarding guide
+  </Card>
+
+  <Card title="Dialpad" icon="phone" href="/call-forwarding/dialpad">
+    Complete Dialpad forwarding guide
+  </Card>
+
+  <Card title="Google Voice" icon="phone" href="/call-forwarding/google-voice">
+    Complete Google Voice forwarding guide
+  </Card>
+</CardGroup>
