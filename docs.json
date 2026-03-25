@@ -86,32 +86,32 @@
           {
             "group": "Calls",
             "pages": [
-              { "openapi": "GET /api/calls" },
-              { "openapi": "POST /api/calls/outbound" },
-              { "openapi": "GET /api/calls/search" },
-              { "openapi": "GET /api/calls/analytics" },
-              { "openapi": "GET /api/calls/{callId}" },
-              { "openapi": "DELETE /api/calls/{callId}" },
-              { "openapi": "GET /api/calls/{callId}/transcript" },
-              { "openapi": "GET /api/calls/{callId}/recording" }
+              "api-reference/calls/list-calls",
+              "api-reference/calls/trigger-outbound-call",
+              "api-reference/calls/search-calls",
+              "api-reference/calls/call-analytics",
+              "api-reference/calls/get-call",
+              "api-reference/calls/delete-call",
+              "api-reference/calls/get-transcript",
+              "api-reference/calls/get-recording"
             ]
           },
           {
             "group": "Contacts",
             "pages": [
-              { "openapi": "GET /api/contacts" },
-              { "openapi": "POST /api/contacts" },
-              { "openapi": "GET /api/contacts/{clientId}" },
-              { "openapi": "PUT /api/contacts/{clientId}" },
-              { "openapi": "DELETE /api/contacts/{clientId}" }
+              "api-reference/contacts/list-contacts",
+              "api-reference/contacts/create-contact",
+              "api-reference/contacts/get-contact",
+              "api-reference/contacts/update-contact",
+              "api-reference/contacts/delete-contact"
             ]
           },
           {
             "group": "SMS",
             "pages": [
-              { "openapi": "GET /api/sms" },
-              { "openapi": "POST /api/sms/send" },
-              { "openapi": "GET /api/sms/{conversationId}/messages" }
+              "api-reference/sms/list-conversations",
+              "api-reference/sms/send-sms",
+              "api-reference/sms/list-messages"
             ]
           }
         ]
