@@ -1,216 +1,634 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "Recepta Public API",
+    "version": "1.0.0",
+    "description": "The Recepta API lets you programmatically manage calls, contacts, and SMS messages.\n\nUse this API to integrate Recepta with your own applications, CRMs, AI agents, or automation workflows.\n\n## Authentication\n\nAll endpoints require an API key passed in the `x-api-key` header.\n\n```\nx-api-key: rcp_your_api_key_here\n```\n\nCreate and manage API keys in **Settings > API Keys** in the Recepta dashboard.\n\n## Rate Limits\n\nRate limits depend on your subscription plan:\n\n| Plan | Requests / Minute |\n|------|-------------------|\n| Free | 30 |\n| Starter | 60 |\n| Growth | 300 |\n| Enterprise | 1,000 |\n\nEvery response includes rate limit headers:\n- `X-RateLimit-Limit` — maximum requests per window\n- `X-RateLimit-Remaining` — requests remaining\n- `X-RateLimit-Reset` — seconds until window resets\n\nWhen exceeded, you receive a `429 Too Many Requests` response with a `Retry-After` header.\n\n## Pagination\n\nList endpoints support pagination via `page` and `limit` query parameters. Responses include a `pagination` object:\n\n```json\n{\n  \"pagination\": {\n    \"total\": 142,\n    \"page\": 1,\n    \"limit\": 20,\n    \"totalPages\": 8\n  }\n}\n```\n\n## Errors\n\nAll errors follow the same format:\n\n```json\n{\n  \"success\": false,\n  \"message\": \"Human-readable error description\"\n}\n```\n\n| Code | Meaning |\n|------|--------|\n| 400 | Bad Request — invalid or missing parameters |\n| 401 | Unauthorized — invalid or missing API key |\n| 403 | Forbidden — API key lacks required permission |\n| 404 | Not Found — resource does not exist |\n| 409 | Conflict — duplicate resource |\n| 429 | Rate Limited — too many requests |\n| 500 | Server Error — try again later |",
+    "contact": {
+      "name": "Recepta Support",
+      "email": "support@recepta.ai",
+      "url": "https://recepta.ai"
+    }
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.recepta.ai/api/v1",
+      "description": "Production"
     }
   ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
+  "tags": [
+    { "name": "Calls", "description": "Make calls, retrieve transcripts, and manage call records" },
+    { "name": "Contacts", "description": "Create, read, update, and delete contacts" },
+    { "name": "SMS", "description": "Send messages and manage SMS conversations" }
   ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "Your Recepta API key (starts with `rcp_`)"
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operation completed successfully" },
+          "data": { "type": "object" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Error description" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "total": { "type": "integer", "example": 142 },
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 20 },
+          "totalPages": { "type": "integer", "example": 8 }
+        }
+      },
+      "Call": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "69af1467f97caa0d0e1e13e2" },
+          "retellId": { "type": "string", "example": "call_abc123" },
+          "callType": { "type": "string", "enum": ["PHONE_CALL", "WEB_CALL"], "example": "PHONE_CALL" },
+          "direction": { "type": "string", "enum": ["INBOUND", "OUTBOUND"], "example": "INBOUND" },
+          "fromNumber": { "type": "string", "example": "+19032466065" },
+          "toNumber": { "type": "string", "example": "+19034851458" },
+          "status": { "type": "string", "enum": ["REGISTERED", "ONGOING", "ENDED", "ERROR"], "example": "ENDED" },
+          "startTimestamp": { "type": "string", "format": "date-time", "example": "2026-03-09T18:41:43.188Z" },
+          "endTimestamp": { "type": "string", "format": "date-time", "example": "2026-03-09T18:41:49.664Z" },
+          "durationMs": { "type": "integer", "example": 6476 },
+          "companyId": { "type": "string", "example": "69053acd6e4cdf19cb778090" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "OutboundCallRequest": {
+        "type": "object",
+        "required": ["toNumber", "fromNumber"],
+        "properties": {
+          "toNumber": { "type": "string", "description": "Destination phone number (E.164)", "example": "+15551234567" },
+          "fromNumber": { "type": "string", "description": "Your Recepta phone number (E.164)", "example": "+15559876543" },
+          "agentId": { "type": "string", "description": "Agent to use (optional, defaults to company agent)", "example": "agent_abc123" },
+          "metadata": { "type": "object", "description": "Custom metadata to attach to the call" }
+        }
+      },
+      "Transcript": {
+        "type": "object",
+        "properties": {
+          "callId": { "type": "string", "example": "69af1467f97caa0d0e1e13e2" },
+          "transcript": { "type": "string", "example": "Agent: Thank you for calling, how may I help you?\nCaller: I have a question about..." },
+          "source": { "type": "string", "enum": ["database", "retell"], "example": "database" }
+        }
+      },
+      "Recording": {
+        "type": "object",
+        "properties": {
+          "callId": { "type": "string", "example": "69af1467f97caa0d0e1e13e2" },
+          "recordingUrl": { "type": "string", "example": "https://cdn.example.com/recordings/abc123.wav" },
+          "source": { "type": "string", "enum": ["database", "retell"], "example": "database" }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "697929d5ebccbcca5cdaf13b" },
+          "firstName": { "type": "string", "example": "Jane" },
+          "lastName": { "type": "string", "example": "Doe" },
+          "fullName": { "type": "string", "nullable": true, "example": "Jane Doe" },
+          "email": { "type": "string", "example": "jane@example.com" },
+          "phone": { "type": "string", "example": "+15551234567" },
+          "source": { "type": "string", "enum": ["MANUAL", "FACEBOOK", "CSV", "API", "CALL"], "example": "API" },
+          "tags": { "type": "array", "items": { "type": "string" }, "example": ["lead", "website"] },
+          "status": { "type": "string", "example": "active" },
+          "notes": { "type": "string", "example": "Interested in premium plan" },
+          "company_name": { "type": "string", "nullable": true, "example": "Acme Corp" },
+          "address": { "type": "string", "nullable": true },
+          "city": { "type": "string", "nullable": true },
+          "state": { "type": "string", "nullable": true },
+          "zipCode": { "type": "string", "nullable": true },
+          "country": { "type": "string", "nullable": true },
+          "customFields": { "type": "object", "nullable": true, "example": { "referralSource": "google" } },
+          "isActive": { "type": "boolean", "example": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateContactRequest": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "example": "Jane" },
+          "lastName": { "type": "string", "example": "Doe" },
+          "email": { "type": "string", "example": "jane@example.com" },
+          "phone": { "type": "string", "description": "Phone number (auto-normalized to E.164)", "example": "+15551234567" },
+          "source": { "type": "string", "enum": ["MANUAL", "FACEBOOK", "CSV", "API", "CALL"], "default": "API" },
+          "tags": { "type": "array", "items": { "type": "string" }, "example": ["lead"] },
+          "status": { "type": "string", "example": "active" },
+          "notes": { "type": "string", "example": "Met at conference" },
+          "company_name": { "type": "string", "example": "Acme Corp" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zipCode": { "type": "string" },
+          "country": { "type": "string" },
+          "customFields": { "type": "object", "description": "Arbitrary key-value pairs" }
+        }
+      },
+      "UpdateContactRequest": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string" },
+          "notes": { "type": "string" },
+          "customFields": { "type": "object" }
+        }
+      },
+      "SmsConversation": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "69a5f5d966e89fbafd5c601f" },
+          "customerPhone": { "type": "string", "example": "+12243000999" },
+          "companyPhone": { "type": "string", "example": "+17622528168" },
+          "customerName": { "type": "string", "nullable": true, "example": "John Smith" },
+          "customerEmail": { "type": "string", "nullable": true },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED", "CLOSED"], "example": "ACTIVE" },
+          "lastMessageAt": { "type": "string", "format": "date-time" },
+          "lastMessagePreview": { "type": "string", "example": "Thanks for the update!" },
+          "lastMessageDirection": { "type": "string", "enum": ["INBOUND", "OUTBOUND"] },
+          "messageCount": { "type": "integer", "example": 17 },
+          "unreadCount": { "type": "integer", "example": 0 }
+        }
+      },
+      "SmsMessage": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "69ab1d127e930a2684f4edb2" },
+          "conversationId": { "type": "string" },
+          "direction": { "type": "string", "enum": ["INBOUND", "OUTBOUND"], "example": "OUTBOUND" },
+          "fromPhone": { "type": "string", "example": "+17622528168" },
+          "toPhone": { "type": "string", "example": "+12243000999" },
+          "body": { "type": "string", "example": "Your appointment is confirmed for tomorrow at 2pm." },
+          "status": { "type": "string", "enum": ["SENT", "DELIVERED", "FAILED", "RECEIVED"], "example": "DELIVERED" },
+          "sentAt": { "type": "string", "format": "date-time" },
+          "deliveredAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "SendSmsRequest": {
+        "type": "object",
+        "required": ["to", "from", "body"],
+        "properties": {
+          "to": { "type": "string", "description": "Recipient phone number (E.164)", "example": "+15551234567" },
+          "from": { "type": "string", "description": "Your Recepta phone number", "example": "+15559876543" },
+          "body": { "type": "string", "description": "Message content", "example": "Hi! Your appointment is confirmed for tomorrow at 2pm." }
+        }
+      }
+    }
+  },
+  "security": [{ "ApiKeyAuth": [] }],
   "paths": {
-    "/plants": {
+    "/api/calls": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "tags": ["Calls"],
+        "summary": "List calls",
+        "description": "Retrieve a paginated list of all calls for your company.",
+        "operationId": "listCalls",
+        "security": [{ "ApiKeyAuth": [] }],
         "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Page number" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 }, "description": "Results per page (max 100)" }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+            "description": "Calls retrieved successfully",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Calls retrieved successfully" },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "calls": { "type": "array", "items": { "$ref": "#/components/schemas/Call" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
                   }
                 }
               }
-            }
+            }}}
           },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "429": { "description": "Rate limit exceeded", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/api/calls/outbound": {
+      "post": {
+        "tags": ["Calls"],
+        "summary": "Trigger outbound call",
+        "description": "Initiate an outbound phone call to a number using your Recepta agent. **Permission:** `calls:create`",
+        "operationId": "triggerOutboundCall",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OutboundCallRequest" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Call initiated",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Call initiated successfully" },
+                "data": { "type": "object", "properties": { "call": { "$ref": "#/components/schemas/Call" } } }
+              }
+            }}}
+          },
+          "400": { "description": "Invalid parameters", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/calls/search": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Search calls",
+        "description": "Search calls by query string or filter by status.",
+        "operationId": "searchCalls",
+        "security": [{ "ApiKeyAuth": [] }],
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search query (phone number, agent name, etc.)" },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["REGISTERED", "ONGOING", "ENDED", "ERROR"] }, "description": "Filter by call status" }
         ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+            "description": "Search results",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "data": { "type": "object", "properties": { "calls": { "type": "array", "items": { "$ref": "#/components/schemas/Call" } } } }
               }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
+            }}}
           }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+    "/api/calls/analytics": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Call analytics",
+        "description": "Get aggregated call analytics for a date range. **Permission:** `analytics:read`",
+        "operationId": "getCallAnalytics",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start date (YYYY-MM-DD)", "example": "2026-01-01" },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End date (YYYY-MM-DD)", "example": "2026-03-18" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "data": { "type": "object", "properties": { "analytics": { "type": "object" } } }
+              }
+            }}}
+          }
+        }
+      }
+    },
+    "/api/calls/{callId}": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Get a call",
+        "description": "Retrieve details of a specific call by ID.",
+        "operationId": "getCall",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "callId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Call ID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Call retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string" },
+                "data": { "type": "object", "properties": { "call": { "$ref": "#/components/schemas/Call" } } }
+              }
+            }}}
+          },
+          "404": { "description": "Call not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Calls"],
+        "summary": "Delete a call",
+        "description": "Permanently delete a call record. **Permission:** `calls:delete`",
+        "operationId": "deleteCall",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "callId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Call ID" }
+        ],
+        "responses": {
+          "200": { "description": "Call deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } } },
+          "404": { "description": "Call not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/calls/{callId}/transcript": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Get call transcript",
+        "description": "Retrieve the full transcript of a completed call. Transcripts are cached after first retrieval. **Permission:** `calls:transcript`",
+        "operationId": "getCallTranscript",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "callId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Call ID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transcript retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Transcript retrieved" },
+                "data": { "$ref": "#/components/schemas/Transcript" }
+              }
+            }}}
+          },
+          "404": { "description": "Call not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/calls/{callId}/recording": {
+      "get": {
+        "tags": ["Calls"],
+        "summary": "Get call recording",
+        "description": "Retrieve the recording URL of a completed call. **Permission:** `calls:recording`",
+        "operationId": "getCallRecording",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "callId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Call ID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recording retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Recording retrieved" },
+                "data": { "$ref": "#/components/schemas/Recording" }
+              }
+            }}}
+          },
+          "404": { "description": "Call not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/contacts": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "List contacts",
+        "description": "Retrieve a paginated list of contacts with optional search and filtering.",
+        "operationId": "listContacts",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Page number" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 }, "description": "Results per page (max 100)" },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by name, email, or phone" },
+          { "name": "source", "in": "query", "schema": { "type": "string", "enum": ["MANUAL", "FACEBOOK", "CSV", "API", "CALL"] }, "description": "Filter by source" },
+          { "name": "tags", "in": "query", "schema": { "type": "string" }, "description": "Filter by tag" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contacts retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Clients retrieved successfully" },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "clients": { "type": "array", "items": { "$ref": "#/components/schemas/Contact" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }}}
+          }
+        }
+      },
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Create a contact",
+        "description": "Add a new contact to your account. Phone numbers are automatically normalized to E.164 format. **Permission:** `contacts:create`",
+        "operationId": "createContact",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateContactRequest" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact created",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Client created successfully" },
+                "data": { "type": "object", "properties": { "client": { "$ref": "#/components/schemas/Contact" } } }
+              }
+            }}}
+          },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/contacts/{clientId}": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Get a contact",
+        "description": "Retrieve details of a specific contact.",
+        "operationId": "getContact",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "clientId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact ID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "data": { "type": "object", "properties": { "client": { "$ref": "#/components/schemas/Contact" } } }
+              }
+            }}}
+          },
+          "404": { "description": "Contact not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Contacts"],
+        "summary": "Update a contact",
+        "description": "Update fields on an existing contact. Only send the fields you want to change. **Permission:** `contacts:update`",
+        "operationId": "updateContact",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "clientId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact ID" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateContactRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact updated",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "data": { "type": "object", "properties": { "client": { "$ref": "#/components/schemas/Contact" } } }
+              }
+            }}}
+          },
+          "404": { "description": "Contact not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete a contact",
+        "description": "Soft-delete a contact (marks as inactive). **Permission:** `contacts:delete`",
+        "operationId": "deleteContact",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "clientId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Contact ID" }
+        ],
+        "responses": {
+          "200": { "description": "Contact deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } } },
+          "404": { "description": "Contact not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/sms": {
+      "get": {
+        "tags": ["SMS"],
+        "summary": "List SMS conversations",
+        "description": "Retrieve a paginated list of SMS conversations.",
+        "operationId": "listSmsConversations",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Page number" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 }, "description": "Results per page" },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by phone or customer name" },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["ACTIVE", "ARCHIVED", "CLOSED"] }, "description": "Filter by conversation status" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversations retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "SMS conversations retrieved successfully" },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "conversations": { "type": "array", "items": { "$ref": "#/components/schemas/SmsConversation" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }}}
+          }
+        }
+      }
+    },
+    "/api/sms/send": {
+      "post": {
+        "tags": ["SMS"],
+        "summary": "Send an SMS",
+        "description": "Send a text message to a phone number. The `from` number must be a phone number belonging to your company. **Permission:** `sms:send`",
+        "operationId": "sendSms",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SendSmsRequest" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "SMS sent successfully",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "SMS sent successfully" },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "messageId": { "type": "string", "example": "69ab1d127e930a2684f4edb2" },
+                    "conversationId": { "type": "string", "example": "69a5f5d966e89fbafd5c601f" },
+                    "twilioSid": { "type": "string", "example": "SMf7704c3df4a56bfca5f2b5b9b4b74012" },
+                    "status": { "type": "string", "example": "queued" }
+                  }
+                }
+              }
+            }}}
+          },
+          "400": { "description": "Invalid parameters", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/sms/{conversationId}/messages": {
+      "get": {
+        "tags": ["SMS"],
+        "summary": "List messages in a conversation",
+        "description": "Retrieve messages in a specific SMS conversation.",
+        "operationId": "listSmsMessages",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "conversationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Conversation ID" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Page number" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 }, "description": "Messages per page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages retrieved",
+            "content": { "application/json": { "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "SMS messages retrieved successfully" },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "messages": { "type": "array", "items": { "$ref": "#/components/schemas/SmsMessage" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }}}
+          },
+          "404": { "description": "Conversation not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
       }
     }
   }

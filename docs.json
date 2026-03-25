@@ -2,6 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Recepta.ai Voice Agent SaaS",
+  "openapi": "api-reference/openapi.json",
   "colors": {
     "primary": "#667EEA",
     "light": "#9CA3F4",
@@ -71,6 +72,46 @@
               "advanced/webhooks",
               "advanced/custom-prompts",
               "advanced/integrations"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api-reference/introduction"]
+          },
+          {
+            "group": "Calls",
+            "pages": [
+              { "openapi": "GET /api/calls" },
+              { "openapi": "POST /api/calls/outbound" },
+              { "openapi": "GET /api/calls/search" },
+              { "openapi": "GET /api/calls/analytics" },
+              { "openapi": "GET /api/calls/{callId}" },
+              { "openapi": "DELETE /api/calls/{callId}" },
+              { "openapi": "GET /api/calls/{callId}/transcript" },
+              { "openapi": "GET /api/calls/{callId}/recording" }
+            ]
+          },
+          {
+            "group": "Contacts",
+            "pages": [
+              { "openapi": "GET /api/contacts" },
+              { "openapi": "POST /api/contacts" },
+              { "openapi": "GET /api/contacts/{clientId}" },
+              { "openapi": "PUT /api/contacts/{clientId}" },
+              { "openapi": "DELETE /api/contacts/{clientId}" }
+            ]
+          },
+          {
+            "group": "SMS",
+            "pages": [
+              { "openapi": "GET /api/sms" },
+              { "openapi": "POST /api/sms/send" },
+              { "openapi": "GET /api/sms/{conversationId}/messages" }
             ]
           }
         ]
